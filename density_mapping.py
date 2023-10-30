@@ -133,9 +133,10 @@ def density_2D_vsf(frame, step_width, overlap, start_point, end_point, ps_in_px,
     start_point_var = start_point
     values_axes = []
     while start_point_var + step_width <= end_point:
-        x = interparticle_distance(frame[start_point_var:(start_point_var + step_width),0:1000], ps_in_px, min_mass_cut, iter_step_dr)
-        a = (x*0.00118)/1.79
-        density = np.append(density, 3/(4*np.pi*(a**3)))    #Calculating particle density from wigner-seitz -> a = (x*0.00118)/1.79 #in cm and density=3/(4*np.pi*a**3)
+        x = interparticle_distance(frame[start_point_var:(start_point_var + step_width),:], ps_in_px, min_mass_cut, iter_step_dr)
+        a = (x*0.00118)/1.79     #Calculating particle density from wigner-seitz -> a = (x*0.00118)/1.79 #in cm and density=3/(4*np.pi*a**3); doi = {10.1063/1.4914468}
+        #error: 1.79 /pm 0.07
+        density = np.append(density, 3/(4*np.pi*(a**3)))    
         print (str(a*10000)+' mum')
         values_axes = np.append(values_axes, start_point_var+overlap/2)
         start_point_var = start_point_var + (step_width - overlap)
@@ -178,7 +179,11 @@ plt.imshow(img_1)
 #%%
 #https://michael-fuchs-python.netlify.app/2020/06/20/hdbscan/
 
-df_located = tp.locate(img_1,9,70)
+#PSF = 3-12 depending on particle size and exposure time
+#Brigthness Threshold = cancel out faint particles, depending on camera gain and exposure time
+#doi = {10.1063/1.4914468}  
+
+df_located = tp.locate(img_1,9,70)      #(img, PSD, min_brigthness)
 
 #
 x_coords = df_located['x'].to_numpy()
@@ -220,7 +225,8 @@ end_point_4 = 1700
 step_width = 150
 overlap = 100
 
-y0,x0 = density_2D_vsf(gaussian_filter(frames[0], sigma=1), step_width, overlap, start_point_0, end_point_0, ps_in_px, min_mass_cut, iter_step_dr) #gives particle densities in certain split sections adjustable in pixel. 
+#gives particle densities in certain split sections adjustable in pixel. 
+y0,x0 = density_2D_vsf(gaussian_filter(frames[0], sigma=1), step_width, overlap, start_point_0, end_point_0, ps_in_px, min_mass_cut, iter_step_dr)
 y1,x1 = density_2D_vsf(gaussian_filter(frames[1], sigma=1),  step_width, overlap, start_point, end_point, ps_in_px, min_mass_cut, iter_step_dr)
 y2,x2 = density_2D_vsf(gaussian_filter(frames[2], sigma=1),  step_width, overlap, start_point, end_point, ps_in_px, min_mass_cut, iter_step_dr)
 y3,x3 = density_2D_vsf(gaussian_filter(frames[3], sigma=1),  step_width, overlap, start_point_3, end_point_3, ps_in_px, min_mass_cut, iter_step_dr)
@@ -230,13 +236,14 @@ y5,x5 = density_2D_vsf(gaussian_filter(frames[5], sigma=1),  step_width, overlap
 #%%
 
 #Var prep for plot
+# y in cm^-3
 y0 = np.multiply(y0,10**(-5))
 y1 = np.multiply(y1,10**(-5))
 y2 = np.multiply(y2,10**(-5))
 y3 = np.multiply(y3,10**(-5))
 y4 = np.multiply(y4,10**(-5))
 y5 = np.multiply(y5,10**(-5))
-# x in mm
+# x in mm  from tube axis
 x0 = np.multiply(np.subtract(x0,1050), 0.0118)
 x1 = np.multiply(np.subtract(x1,1050), 0.0118)
 x2 = np.multiply(np.subtract(x2,1050), 0.0118)
