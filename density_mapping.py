@@ -26,6 +26,8 @@ from scipy.optimize import curve_fit
 import scipy.special as scsp
 from scipy.ndimage import gaussian_filter, gaussian_filter1d
 
+import scienceplots
+
 ### --- Generate Greyscale Vertical ---- ###
        
 def grayscale_v(frame,sum_step):
@@ -162,13 +164,17 @@ def density_2D_vsf(frame, step_width, overlap, start_point, end_point, ps_in_px,
 #Frame pre analysis. Prepare frame for density calculations. Crop Image at particle population area.
 frames = pims.open('densitydata/*.bmp')
 
-img1 = frames[-1]
+img1 = frames[0]
 
-cut_l = 1450
-cut_r = 1950
+cut_l = 1250
+cut_r = 1650
 
 img_1 = img1[cut_l:cut_r,:]
 
+
+# Optionally, tweak styles.
+mpl.rc('figure',  figsize=(10, 5))
+mpl.rc('image', cmap='gray')
 plt.imshow(img_1)
 
 #%%
@@ -202,19 +208,19 @@ plt.scatter(data.T[0], data.T[1], color='r', **plot_kwds, facecolors='none')
 ### MAIN CODE ###
 
 ### 1.31 micrometer particles do have a psf of around 3 pixels [M.Y. Pustylnik et. al. (2016), "Plasmakristall-4: New complex (dusty) plasma laboratory on board the International Space Station"]
-ps_in_px = 5 # 9   #needs to be odd number (13 from agglomeration 24.06.2022, 9 from density 16.02.2023)
-min_mass_cut = 17 # 68  #from experience (200 from agglomeration 24.06.2022, 70 from density 16.02.2023)
+ps_in_px = 9 # 9   #needs to be odd number (13 from agglomeration 24.06.2022, 9 from density 16.02.2023)
+min_mass_cut = 70 # 68  #from experience (200 from agglomeration 24.06.2022, 70 from density 16.02.2023)
 iter_step_dr = 0.5  #from experience (accuracy and computationsla time taken into account)
 
 
 #interparticle_distance_arr, grayscale = density_2D_v_modeling(frames[:-2], 100, 50, ps_in_px, min_mass_cut, iter_step_dr)
 #print(interparticle_distance_arr)
 #
-start_point = 1100 #in pixel
-end_point = 1500 #in pixel
+start_point = 1250 #in pixel
+end_point = 1650 #in pixel
 #
-start_point_0 = 1050 
-end_point_0 = 1450
+start_point_1 = 1050 
+end_point_1 = 1450
 #
 start_point_3 = 1100
 end_point_3 = 1400
@@ -226,7 +232,7 @@ step_width = 150
 overlap = 100
 
 #gives particle densities in certain split sections adjustable in pixel. 
-y0,x0 = density_2D_vsf(gaussian_filter(frames[0], sigma=1), step_width, overlap, start_point_0, end_point_0, ps_in_px, min_mass_cut, iter_step_dr)
+y0,x0 = density_2D_vsf(gaussian_filter(frames[0], sigma=1), step_width, overlap, start_point, end_point, ps_in_px, min_mass_cut, iter_step_dr)
 y1,x1 = density_2D_vsf(gaussian_filter(frames[1], sigma=1),  step_width, overlap, start_point, end_point, ps_in_px, min_mass_cut, iter_step_dr)
 y2,x2 = density_2D_vsf(gaussian_filter(frames[2], sigma=1),  step_width, overlap, start_point, end_point, ps_in_px, min_mass_cut, iter_step_dr)
 y3,x3 = density_2D_vsf(gaussian_filter(frames[3], sigma=1),  step_width, overlap, start_point_3, end_point_3, ps_in_px, min_mass_cut, iter_step_dr)
