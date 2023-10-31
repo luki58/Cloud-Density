@@ -116,7 +116,7 @@ def density_2D_v_modeling(frames, step_width, overlap, ps_in_px, min_mass_cut, i
         id_temp = []
         id_temp_nozeros = []
         while start_point + step_width <= end_point:
-            x = interparticle_distance(frame[start_point:(start_point + step_width),0:2000], ps_in_px, min_mass_cut, iter_step_dr)
+            x = interparticle_distance(frame[start_point:(start_point + step_width),:], ps_in_px, min_mass_cut, iter_step_dr)
             id_temp = np.append(id_temp, x)
             start_point = start_point + (step_width - overlap)
         for n in range(len(id_temp)):
@@ -124,7 +124,7 @@ def density_2D_v_modeling(frames, step_width, overlap, ps_in_px, min_mass_cut, i
                 id_temp_nozeros = np.append(id_temp_nozeros, id_temp[n])
         print('frame finished '+str(i))
         interparticle_distance_tp = np.append(interparticle_distance_tp, np.average(id_temp_nozeros))   
-        grayscale = np.append(grayscale, np.average(grayscale_v(frame[start_point:,0:2000], step_width)))
+        grayscale = np.append(grayscale, np.average(grayscale_v(frame[start_point:,:], step_width)))
     interparticle_distance_tp[:] = 3/(4*np.pi*((interparticle_distance_tp[:]*0.00118)/1.79)**3)    #Calculating particle density from wigner-seitz -> a = (x*0.0018)/1.79 #in cm and density=3/(4*np.pi*a**3)
     return interparticle_distance_tp, grayscale
 
@@ -208,8 +208,8 @@ plt.scatter(data.T[0], data.T[1], color='r', **plot_kwds, facecolors='none')
 ### MAIN CODE ###
 
 ### 1.31 micrometer particles do have a psf of around 3 pixels [M.Y. Pustylnik et. al. (2016), "Plasmakristall-4: New complex (dusty) plasma laboratory on board the International Space Station"]
-ps_in_px = 9 # 9   #needs to be odd number (13 from agglomeration 24.06.2022, 9 from density 16.02.2023)
-min_mass_cut = 70 # 68  #from experience (200 from agglomeration 24.06.2022, 70 from density 16.02.2023)
+ps_in_px = 9   #point spread function of particle; needs to be odd number (13 from agglomeration 24.06.2022, 9 from density 16.02.2023)
+min_mass_cut = 70   #Brigthness Threshold = cancel out faint particles; from experience (200 from agglomeration 24.06.2022, 70 from density 16.02.2023)
 iter_step_dr = 0.5  #from experience (accuracy and computationsla time taken into account)
 
 
